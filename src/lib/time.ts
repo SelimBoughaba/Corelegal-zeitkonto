@@ -266,3 +266,24 @@ export function validateEntry(e: Entry, others: Entry[]): Issue[] {
 export function sortEntries(list: Entry[]) {
   return [...list].sort((a, b) => (a.date === b.date ? toMin(a.start) - toMin(b.start) : a.date < b.date ? -1 : 1))
 }
+
+export const DAY_START = 10 * 60 // Arbeitsbeginn bei Corelegal: 10:00
+
+/**
+ * Vorschlag für Beginn und Ende eines neuen Eintrags.
+ * Erster Eintrag des Tages beginnt um 10:00, weitere Einträge schließen an das Ende des letzten an.
+ * Ende: heute die aktuelle Uhrzeit (auf 15 Min. gerundet), sonst bzw. wenn das nicht nach dem Beginn liegt, eine Stunde später.
+ */
+export function suggestTimes(entries: Entry[], date: string, now: Date = new Date()): { start: string; end: string } {
+  const sameDay = entries.filter((e) => e.date === date)
+  let start = DAY_START
+  if (sameDay.length) {
+    start = Math.max(...sameDay.map((e) => toMin(e.start) + span(e.start, e.end)))
+  }
+  let end = start + 60
+  if (date === dateKey(now)) {
+    const nowRounded = roundMin(now.getHours() * 60 + now.getMinutes(), 15)
+    if (nowRounded > start) end = nowRounded
+  }
+  return { start: fromMin(start), end: fromMin(end) }
+}

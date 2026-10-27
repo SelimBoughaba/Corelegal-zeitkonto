@@ -54,3 +54,13 @@ test('Kalenderwochen', () => {
   expect(isoWeek('2026-10-27')).toBe(44)
   expect(weekStart('2026-11-01')).toBe('2026-10-26')
 })
+
+import { suggestTimes } from './time'
+test('Vorschlag: erster Eintrag 10:00, danach Anschluss', () => {
+  const now = new Date(2026, 9, 27, 14, 5)
+  expect(suggestTimes([], '2026-10-27', now)).toEqual({ start: '10:00', end: '14:00' })
+  expect(suggestTimes([e({ start: '10:00', end: '12:15' })], '2026-10-27', now)).toEqual({ start: '12:15', end: '14:00' })
+  expect(suggestTimes([e({ start: '10:00', end: '12:15' }), e({ id: 'y', start: '12:15', end: '14:30' })], '2026-10-27', now)).toEqual({ start: '14:30', end: '15:30' })
+  expect(suggestTimes([e({ start: '10:00', end: '12:15' })], '2026-10-26', now)).toEqual({ start: '10:00', end: '11:00' })
+  expect(suggestTimes([], '2026-10-27', new Date(2026, 9, 27, 8, 30))).toEqual({ start: '10:00', end: '11:00' })
+})

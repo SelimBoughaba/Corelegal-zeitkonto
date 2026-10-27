@@ -1,19 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Sheet, TimeField, showToast } from './ui'
 import { Icon } from './Icon'
-import { actions, recentAkten, useStore } from '../lib/store'
-import { type Entry, uid, todayKey, netMinutes, pauseMinutes, fmtDur, validateEntry, toMin, fromMin, roundMin, span } from '../lib/time'
+import { actions, recentAkten, useStore, getState } from '../lib/store'
+import { type Entry, uid, todayKey, netMinutes, pauseMinutes, fmtDur, validateEntry, toMin, fromMin, roundMin, span, suggestTimes } from '../lib/time'
 import { haptic } from '../lib/device'
 
 export function blankEntry(date = todayKey()): Entry {
-  const now = new Date()
-  const end = roundMin(now.getHours() * 60 + now.getMinutes(), 15)
-  const start = Math.max(0, end - 120)
+  const { start, end } = suggestTimes(getState().entries, date)
   return {
     id: uid(),
     date,
-    start: fromMin(start),
-    end: fromMin(end),
+    start,
+    end,
     pauses: [],
     akte: '',
     category: 'Recherche',
@@ -120,7 +118,17 @@ export function EntryEditor({ entry, onClose, isNew, focusDetails }: { entry: En
       }
     >
       <label className="form-label" htmlFor="datum">Tag</label>
-      <input id="datum" className="field" type="date" value={e.date} onChange={(ev) => ev.target.value && patch({ date: ev.target.value })} />
+      <input
+        id="datum"
+        className="field"
+        type="date"
+        value={e.date}
+        onChange={(ev) => {
+          const d = ev.target.value
+          if (!d) return
+          patch(isNew ? { date: d, ...suggestTimes(getState().entries, d) } : { date: d })
+        }}
+      />
 
       <div className="pair" style={{ marginTop: 18 }}>
         <div>
