@@ -1,0 +1,6 @@
+node_modules/
+dist/
+public/icons/
+.vercel/
+.DS_Store
+*.log

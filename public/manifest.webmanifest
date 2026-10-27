@@ -1,0 +1,17 @@
+{
+  "name": "Corelegal Zeiten",
+  "short_name": "Zeiten",
+  "description": "Arbeitszeiten bei Corelegal erfassen und als Excel exportieren",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1E1D1D",
+  "theme_color": "#1E1D1D",
+  "lang": "de",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
