@@ -18,3 +18,5 @@ npm run build    # Icons erzeugen + Produktions-Build nach dist/
 ## Deployment
 
 Vercel, Framework Vite, Output `dist`. Bei Deployment aus einem Git-Repo genügt als Build Command `npm run build`.
+
+Jeder Push auf `main` wird automatisch auf Vercel (Projekt selim-zeiten) deployt.
