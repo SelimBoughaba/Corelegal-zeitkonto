@@ -1,7 +1,7 @@
 import type { Workbook, Worksheet } from 'exceljs'
 import { type Entry, netMinutes, pauseMinutes, toMin, span, weekdayLong, fmtDate, monthKey, fmtMonth, parseKey, crossesMidnight } from './time'
 
-export type ExportRange = { from: string; to: string; label: string; fileTag: string }
+export type ExportRange = { from: string; to: string; label: string; fileTag: string; simple?: boolean }
 
 const FILL_HEAD = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FF1E1D1D' } }
 const FILL_TOTAL = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FFE6E2D6' } }
@@ -31,6 +31,41 @@ function totalRow(ws: Worksheet, values: Record<string, unknown>) {
   row.font = { name: FONT, bold: true }
   row.eachCell({ includeEmpty: true }, (c) => (c.fill = FILL_TOTAL))
   return row
+}
+
+/** Tagesexport: nur ein Blatt mit den Einträgen in fester Spaltenreihenfolge */
+export async function buildDayWorkbook(all: Entry[], range: ExportRange): Promise<Workbook> {
+  const ExcelJS = (await import('exceljs')).default
+  const entries = all.filter((e) => e.date >= range.from && e.date <= range.to)
+  const wb = new ExcelJS.Workbook()
+  wb.creator = 'Corelegal Zeiten'
+  const ws = wb.addWorksheet('Einträge')
+  header(ws, [
+    { header: 'Datum', key: 'date', width: 12, fmt: 'dd.mm.yyyy' },
+    { header: 'Wochentag', key: 'wd', width: 12 },
+    { header: 'Beginn', key: 'start', width: 9, fmt: 'hh:mm' },
+    { header: 'Ende', key: 'end', width: 9, fmt: 'hh:mm' },
+    { header: 'Arbeitszeit', key: 'net', width: 12, fmt: '[h]:mm' },
+    { header: 'Akte', key: 'akte', width: 18 },
+    { header: 'Tätigkeit', key: 'cat', width: 18 },
+    { header: 'Tätigkeitsbeschreibung', key: 'desc', width: 60 },
+  ])
+  for (const e of entries) {
+    const r = ws.addRow({
+      date: asDate(e.date),
+      wd: weekdayLong(e.date),
+      start: asTime(toMin(e.start)),
+      end: asTime(toMin(e.end)),
+      net: asTime(netMinutes(e)),
+      akte: e.akte,
+      cat: e.category,
+      desc: e.description,
+    })
+    r.alignment = { vertical: 'top' }
+    r.getCell('desc').alignment = { wrapText: true, vertical: 'top' }
+  }
+  ws.eachRow((r) => r.eachCell((c) => { if (!c.font?.name) c.font = { ...(c.font ?? {}), name: FONT } }))
+  return wb
 }
 
 export async function buildWorkbook(all: Entry[], range: ExportRange, name: string): Promise<Workbook> {
@@ -208,7 +243,7 @@ export async function buildWorkbook(all: Entry[], range: ExportRange, name: stri
 }
 
 export async function exportExcel(all: Entry[], range: ExportRange, name: string): Promise<{ blob: Blob; filename: string }> {
-  const wb = await buildWorkbook(all, range, name)
+  const wb = range.simple ? await buildDayWorkbook(all, range) : await buildWorkbook(all, range, name)
   const buf = await wb.xlsx.writeBuffer()
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
   return { blob, filename: `Corelegal_Arbeitszeiten_${range.fileTag}.xlsx` }

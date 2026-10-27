@@ -11,7 +11,7 @@ type Mode = 'day' | 'week' | 'month' | 'year' | 'custom'
 function rangeFor(mode: Mode, anchor: string, from: string, to: string): ExportRange {
   switch (mode) {
     case 'day':
-      return { from: anchor, to: anchor, label: fmtDayLong(anchor), fileTag: anchor }
+      return { from: anchor, to: anchor, label: fmtDayLong(anchor), fileTag: anchor, simple: true }
     case 'week': {
       const a = weekStart(anchor)
       const b = addDays(a, 6)
