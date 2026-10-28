@@ -11,10 +11,15 @@ test('Tagesexport: ein Blatt, feste Spalten, nur der Tag', async () => {
   expect(wb.worksheets.map((w) => w.name)).toEqual(['Einträge'])
   const ws = wb.worksheets[0]
   expect((ws.getRow(1).values as unknown[]).slice(1)).toEqual(['Datum', 'Wochentag', 'Beginn', 'Ende', 'Arbeitszeit', 'Akte', 'Tätigkeit', 'Tätigkeitsbeschreibung'])
-  expect(ws.rowCount).toBe(3)
+  expect(ws.rowCount).toBe(4)
+  const sum = ws.getRow(4)
+  expect(sum.getCell(1).value).toBe('Gesamt')
+  const f = sum.getCell(5).value as { formula: string; result: number }
+  expect(f.formula).toBe('SUM(E2:E3)')
+  expect(Math.round(f.result * 1440)).toBe(270)
   const r3 = ws.getRow(3)
   expect(r3.getCell(2).value).toBe('Dienstag')
   expect(Math.round((r3.getCell(5).value as number) * 1440)).toBe(135)
   expect(r3.getCell(7).value).toBe('Schriftsatz')
-  await wb.xlsx.writeFile(process.env.OUT ?? '/tmp/day.xlsx')
+  await wb.xlsx.writeFile((globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.OUT ?? '/tmp/day.xlsx')
 })

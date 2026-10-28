@@ -64,6 +64,11 @@ export async function buildDayWorkbook(all: Entry[], range: ExportRange): Promis
     r.alignment = { vertical: 'top' }
     r.getCell('desc').alignment = { wrapText: true, vertical: 'top' }
   }
+  if (entries.length) {
+    const total = entries.reduce((sum, e) => sum + netMinutes(e), 0)
+    const last = entries.length + 1
+    totalRow(ws, { date: 'Gesamt', net: { formula: `SUM(E2:E${last})`, result: asTime(total) } })
+  }
   ws.eachRow((r) => r.eachCell((c) => { if (!c.font?.name) c.font = { ...(c.font ?? {}), name: FONT } }))
   return wb
 }
