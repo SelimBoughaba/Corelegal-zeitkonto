@@ -30,8 +30,8 @@ export function EntryRow({ e, onEdit }: { e: Entry; onEdit: (e: Entry) => void }
 }
 
 /** Tagesband 6–22 Uhr (erweitert sich, wenn Einträge außerhalb liegen) */
-function Ribbon({ entries, liveStart, now }: { entries: Entry[]; liveStart: number | null; now: number }) {
-  const nowMin = new Date(now).getHours() * 60 + new Date(now).getMinutes()
+export function Ribbon({ entries, liveStart, now, showNow = true }: { entries: Entry[]; liveStart: number | null; now: number; showNow?: boolean }) {
+  const nowMin = showNow ? new Date(now).getHours() * 60 + new Date(now).getMinutes() : 0
   let lo = 7 * 60
   let hi = 20 * 60
   entries.forEach((e) => {
@@ -39,7 +39,8 @@ function Ribbon({ entries, liveStart, now }: { entries: Entry[]; liveStart: numb
     hi = Math.max(hi, Math.ceil((toMin(e.start) + span(e.start, e.end)) / 60) * 60)
   })
   if (liveStart !== null) lo = Math.min(lo, Math.floor(liveStart / 60) * 60)
-  hi = Math.min(Math.max(hi, Math.ceil((nowMin + 1) / 60) * 60), 24 * 60)
+  if (showNow) hi = Math.max(hi, Math.ceil((nowMin + 1) / 60) * 60)
+  hi = Math.min(hi, 24 * 60)
   const pct = (m: number) => `${((Math.min(Math.max(m, lo), hi) - lo) / (hi - lo)) * 100}%`
   const w = (a: number, b: number) => `${((Math.min(b, hi) - Math.max(a, lo)) / (hi - lo)) * 100}%`
   const hours = (hi - lo) / 60
@@ -66,7 +67,7 @@ function Ribbon({ entries, liveStart, now }: { entries: Entry[]; liveStart: numb
           )
         })}
         {liveStart !== null && <i className="ribbon-block live" style={{ left: pct(liveStart), width: w(liveStart, nowMin) }} />}
-        <i className="ribbon-now" style={{ left: pct(nowMin) }} />
+        {showNow && <i className="ribbon-now" style={{ left: pct(nowMin) }} />}
       </div>
       <div className="ribbon-scale num">
         {ticks.map((t, i) => (
@@ -77,7 +78,7 @@ function Ribbon({ entries, liveStart, now }: { entries: Entry[]; liveStart: numb
   )
 }
 
-export function Today({ onEdit, onNew, onSettings }: { onEdit: (e: Entry) => void; onNew: () => void; onSettings: () => void }) {
+export function Today({ onEdit, onNew, onSettings, onOpenDay }: { onEdit: (e: Entry) => void; onNew: () => void; onSettings: () => void; onOpenDay: (date: string) => void }) {
   const entries = useStore((s) => s.entries)
   const session = useStore((s) => s.session)
   const limit = useStore((s) => s.settings.weeklyLimit)
@@ -130,10 +131,10 @@ export function Today({ onEdit, onNew, onSettings }: { onEdit: (e: Entry) => voi
       <Ribbon entries={list} liveStart={liveStart} now={now} />
 
       <div className="summary">
-        <div className="summary-cell">
+        <button className="summary-cell tappable" onClick={() => onOpenDay(today)} aria-label="Tagesübersicht für heute öffnen">
           <div className="big num">{fmtDur(todayMin)}</div>
-          <div className="lbl">heute gearbeitet</div>
-        </div>
+          <div className="lbl">heute gearbeitet ›</div>
+        </button>
         <div className="summary-cell">
           <div className="big num">{fmtDur(weekMin)}</div>
           <div className="lbl">{limit ? `diese Woche von ${limit} h` : 'diese Woche'}</div>

@@ -26,3 +26,11 @@ export function watchSystemMode(cb: () => void) {
   mq?.addEventListener('change', cb)
   return () => mq?.removeEventListener('change', cb)
 }
+
+const CAT_COLORS = ['var(--cat-1)', 'var(--cat-2)', 'var(--cat-3)', 'var(--cat-4)', 'var(--cat-5)']
+
+/** Feste Farbe je Kategorie nach ihrer Position in den Einstellungen, nie nach Rang */
+export function categoryColor(categories: string[], label: string) {
+  const i = categories.indexOf(label)
+  return i >= 0 && i < CAT_COLORS.length ? CAT_COLORS[i] : 'var(--urban)'
+}

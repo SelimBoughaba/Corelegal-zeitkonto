@@ -5,6 +5,7 @@ import { ToastHost } from './components/ui'
 import { EntryEditor, blankEntry } from './components/EntryEditor'
 import { Dock, TimerSheet, useStopFlow } from './components/Timer'
 import { SettingsSheet } from './components/SettingsSheet'
+import { DaySheet } from './components/DaySheet'
 import { LockScreen, Onboarding, PinSetup } from './components/Lock'
 import { Today } from './views/Today'
 import { History } from './views/History'
@@ -33,6 +34,7 @@ export default function App() {
   const [edit, setEdit] = useState<EditState>(null)
   const [timerOpen, setTimerOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [dayOpen, setDayOpen] = useState<string | null>(null)
   const [pinSetup, setPinSetup] = useState(false)
   const hiddenAt = useRef<number | null>(null)
 
@@ -87,9 +89,9 @@ export default function App() {
   return (
     <div className="app">
       <main>
-        {tab === 'today' && <Today onEdit={openEdit} onNew={() => openNew()} onSettings={() => setSettingsOpen(true)} />}
-        {tab === 'history' && <History onEdit={openEdit} onNew={openNew} />}
-        {tab === 'stats' && <Stats />}
+        {tab === 'today' && <Today onEdit={openEdit} onNew={() => openNew()} onSettings={() => setSettingsOpen(true)} onOpenDay={setDayOpen} />}
+        {tab === 'history' && <History onEdit={openEdit} onNew={openNew} onOpenDay={setDayOpen} />}
+        {tab === 'stats' && <Stats onOpenDay={setDayOpen} />}
         {tab === 'export' && <Export onSettings={() => setSettingsOpen(true)} />}
       </main>
 
@@ -105,6 +107,7 @@ export default function App() {
       </nav>
 
       <TimerSheet open={timerOpen} onClose={() => setTimerOpen(false)} onStop={stop} />
+      <DaySheet date={dayOpen} onClose={() => setDayOpen(null)} onEdit={openEdit} onNew={(d) => openNew(d)} />
       <EntryEditor entry={edit?.entry ?? null} isNew={edit?.isNew} focusDetails={edit?.focus} onClose={() => setEdit(null)} />
       <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} onSetupPin={() => { setSettingsOpen(false); setPinSetup(true) }} />
       <ToastHost />

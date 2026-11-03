@@ -6,6 +6,9 @@ import { stepTime } from '../lib/time'
 
 // ---------- Sheet: Griff, nach unten wischen zum Schließen ----------
 
+let openSheets = 0
+const escStack: object[] = []
+
 export function Sheet({
   open,
   onClose,
@@ -44,14 +47,21 @@ export function Sheet({
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close()
+    const token = {}
+    escStack.push(token)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && escStack[escStack.length - 1] === token && close()
     window.addEventListener('keydown', onKey)
+    openSheets++
     document.body.style.overflow = 'hidden'
     document.body.classList.add('sheet-open')
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-      document.body.classList.remove('sheet-open')
+      escStack.splice(escStack.indexOf(token), 1)
+      openSheets = Math.max(0, openSheets - 1)
+      if (openSheets === 0) {
+        document.body.style.overflow = ''
+        document.body.classList.remove('sheet-open')
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])

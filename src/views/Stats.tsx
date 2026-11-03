@@ -44,7 +44,7 @@ function Bars({ data, selected, onSelect, label }: { data: { key: string; label:
   )
 }
 
-export function Stats() {
+export function Stats({ onOpenDay }: { onOpenDay: (date: string) => void }) {
   const entries = useStore((s) => s.entries)
   const catOrder = useStore((s) => s.settings.categories)
   const catColor = (label: string) => {
@@ -100,14 +100,14 @@ export function Stats() {
                   aria-label={`${fmtDate(c.key)}: ${fmtDur(c.min)} Stunden`}
                   className={`${c.future ? 'future' : ''} ${c.key === today ? 'today' : ''}`}
                   style={!c.future ? { background: `var(--heat-${heatLevel(c.min)})` } : undefined}
-                  onClick={() => { if (!c.future) { setSelCell(c.key); haptic('light') } }}
+                  onClick={() => { if (!c.future) { setSelCell(c.key); haptic('light'); onOpenDay(c.key) } }}
                 />
               ))}
             </div>
           </div>
           <div className="legend">
             <span style={{ marginRight: 'auto' }} className="num">
-              {cellInfo ? `${weekdayShort(cellInfo.key)}, ${fmtDate(cellInfo.key)}: ${fmtDur(cellInfo.min)} h` : 'Tippe auf einen Tag'}
+              {cellInfo ? `${weekdayShort(cellInfo.key)}, ${fmtDate(cellInfo.key)}: ${fmtDur(cellInfo.min)} h` : 'Tippe auf einen Tag für Details'}
             </span>
             weniger
             {[0, 1, 2, 3, 4].map((l) => (
