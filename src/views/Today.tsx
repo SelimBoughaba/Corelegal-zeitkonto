@@ -78,7 +78,7 @@ export function Ribbon({ entries, liveStart, now, showNow = true }: { entries: E
   )
 }
 
-export function Today({ onEdit, onNew, onSettings, onOpenDay }: { onEdit: (e: Entry) => void; onNew: () => void; onSettings: () => void; onOpenDay: (date: string) => void }) {
+export function Today({ onEdit, onNew, onSettings, onOpenDay, onDictate }: { onEdit: (e: Entry) => void; onNew: () => void; onSettings: () => void; onOpenDay: (date: string) => void; onDictate: () => void }) {
   const entries = useStore((s) => s.entries)
   const session = useStore((s) => s.session)
   const limit = useStore((s) => s.settings.weeklyLimit)
@@ -105,6 +105,9 @@ export function Today({ onEdit, onNew, onSettings, onOpenDay }: { onEdit: (e: En
       <div className="titlebar">
         <h1 className="large-title">Heute</h1>
         <div className="toolbar">
+          <button className="icon-btn" aria-label="Diktieren" onClick={onDictate}>
+            <Icon name="mic" />
+          </button>
           <button className="icon-btn" aria-label="Eintrag manuell hinzufügen" onClick={onNew}>
             <Icon name="plus" />
           </button>

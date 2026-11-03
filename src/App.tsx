@@ -6,13 +6,14 @@ import { EntryEditor, blankEntry } from './components/EntryEditor'
 import { Dock, TimerSheet, useStopFlow } from './components/Timer'
 import { SettingsSheet } from './components/SettingsSheet'
 import { DaySheet } from './components/DaySheet'
+import { DictationSheet } from './components/DictationSheet'
 import { LockScreen, Onboarding, PinSetup } from './components/Lock'
 import { Today } from './views/Today'
 import { History } from './views/History'
 import { Stats } from './views/Stats'
 import { Export } from './views/Export'
 import { useStore, getState } from './lib/store'
-import { type Entry } from './lib/time'
+import { type Entry, todayKey } from './lib/time'
 import { haptic, requestPersistence } from './lib/device'
 import { applyTheme, watchSystemMode } from './lib/theme'
 
@@ -35,6 +36,7 @@ export default function App() {
   const [timerOpen, setTimerOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dayOpen, setDayOpen] = useState<string | null>(null)
+  const [dictate, setDictate] = useState<string | null>(null)
   const [pinSetup, setPinSetup] = useState(false)
   const hiddenAt = useRef<number | null>(null)
 
@@ -89,7 +91,7 @@ export default function App() {
   return (
     <div className="app">
       <main>
-        {tab === 'today' && <Today onEdit={openEdit} onNew={() => openNew()} onSettings={() => setSettingsOpen(true)} onOpenDay={setDayOpen} />}
+        {tab === 'today' && <Today onEdit={openEdit} onNew={() => openNew()} onSettings={() => setSettingsOpen(true)} onOpenDay={setDayOpen} onDictate={() => setDictate(todayKey())} />}
         {tab === 'history' && <History onEdit={openEdit} onNew={openNew} onOpenDay={setDayOpen} />}
         {tab === 'stats' && <Stats onOpenDay={setDayOpen} />}
         {tab === 'export' && <Export onSettings={() => setSettingsOpen(true)} />}
@@ -107,7 +109,8 @@ export default function App() {
       </nav>
 
       <TimerSheet open={timerOpen} onClose={() => setTimerOpen(false)} onStop={stop} />
-      <DaySheet date={dayOpen} onClose={() => setDayOpen(null)} onEdit={openEdit} onNew={(d) => openNew(d)} />
+      <DaySheet date={dayOpen} onClose={() => setDayOpen(null)} onEdit={openEdit} onNew={(d) => openNew(d)} onDictate={(d) => setDictate(d)} />
+      <DictationSheet date={dictate} onClose={() => setDictate(null)} />
       <EntryEditor entry={edit?.entry ?? null} isNew={edit?.isNew} focusDetails={edit?.focus} onClose={() => setEdit(null)} />
       <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} onSetupPin={() => { setSettingsOpen(false); setPinSetup(true) }} />
       <ToastHost />

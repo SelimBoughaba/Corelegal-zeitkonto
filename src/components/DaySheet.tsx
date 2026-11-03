@@ -18,7 +18,7 @@ function groupMinutes(list: Entry[], key: (e: Entry) => string, empty: string) {
 }
 
 /** Tagesübersicht: Zeitstrahl, alle Einträge, Verteilung nach Akte und Tätigkeit. Wischen über den Kopf wechselt den Tag. */
-export function DaySheet({ date, onClose, onEdit, onNew }: { date: string | null; onClose: () => void; onEdit: (e: Entry) => void; onNew: (date: string) => void }) {
+export function DaySheet({ date, onClose, onEdit, onNew, onDictate }: { date: string | null; onClose: () => void; onEdit: (e: Entry) => void; onNew: (date: string) => void; onDictate: (date: string) => void }) {
   const [day, setDay] = useState(date)
   const [dir, setDir] = useState<'l' | 'r' | ''>('')
   const [shown, setShown] = useState(date)
@@ -96,6 +96,9 @@ export function DaySheet({ date, onClose, onEdit, onNew }: { date: string | null
               <button className="btn" style={{ minHeight: 44 }} onClick={() => onNew(day)}>
                 <Icon name="plus" /> Eintrag hinzufügen
               </button>
+              <button className="btn" style={{ minHeight: 44, marginLeft: 8 }} onClick={() => onDictate(day)}>
+                <Icon name="mic" /> Diktieren
+              </button>
             </div>
           </div>
         </div>
@@ -172,7 +175,10 @@ export function DaySheet({ date, onClose, onEdit, onNew }: { date: string | null
             </div>
           </div>
 
-          <button className="btn block" style={{ marginTop: 18 }} onClick={exportDay}>
+          <button className="btn block" style={{ marginTop: 18 }} onClick={() => onDictate(day)}>
+            <Icon name="mic" /> Für diesen Tag diktieren
+          </button>
+          <button className="btn block" style={{ marginTop: 8 }} onClick={exportDay}>
             <Icon name="share" /> Diesen Tag als Excel exportieren
           </button>
           <p className="hint">Nach links oder rechts über das Datum wischen, um den Tag zu wechseln.</p>
